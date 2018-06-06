@@ -101,7 +101,7 @@ angular.module('sizePredictionApp', [])
 			<!-- Prediction View -->
 			<div ng-show="ctrl.view!='backlog_items'">
 				<center>
-					<span>Once you are ready, click on the right card to see the AI agent estimation!</span>
+					<span>Once you are ready, click on the right card to see the AI agent prediction!</span>
 					<br/><br/>
 					<table>
 						<thead>
@@ -112,8 +112,8 @@ angular.module('sizePredictionApp', [])
 						</thead>
 						<tbody>
 							<tr>
-								<td><img ng-src="{{ctrl.teamCard}}" alt="Team's estimation" /></td>
-								<td><img ng-src="{{ctrl.aiCard}}" alt="Team's estimation" ng-click="ctrl.discoverAICard()" style="cursor: pointer;"/></td>
+								<td><img ng-src="{{ctrl.teamCard}}" alt="Team's prediction" /></td>
+								<td><img ng-src="{{ctrl.aiCard}}" alt="AI's prediction" ng-click="ctrl.discoverAICard()" style="cursor: pointer;"/></td>
 							</tr>				
 						</tbody>
 					</table>
