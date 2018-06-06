@@ -1,0 +1,130 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src='angular.min.js'></script>
+<script src='backlog.js'></script>
+<script>
+angular.module('sizePredictionApp', [])
+   .controller('SizeEstimationController', function($scope, $sce) {
+    vm = this;
+	vm.players =  backlog_items; 
+	vm.tempSearchText = "java";
+	vm.searchText = "java";	
+	vm.view = "backlog_items";
+	vm.teamCard = "card_back.png"
+	vm.aiCard = "card_back.png"
+	vm.aiPrediction = -1;
+	
+	vm.search = function(){
+	  vm.searchText = vm.tempSearchText;
+	};
+
+	vm.keypress = function(keyEvent){
+	  if (keyEvent.which === 13)
+		  vm.search();
+	};
+
+	vm.filter = function(item) {
+		var filterText = vm.searchText.toLowerCase();
+
+		if (!filterText || (item.title.toLowerCase().indexOf(filterText) != -1) || (item.description.toLowerCase().indexOf(filterText) != -1) ){
+			return true;
+		}
+		return false;
+	};
+	
+	vm.highlight = function(text, search) {
+		if (!search)
+			return $sce.trustAsHtml(text);
+		else
+			return $sce.trustAsHtml(text.replace(new RegExp(search, 'gi'), '<span class="highlightedText">$&</span>'));
+	};
+
+	vm.predict = function(item) {	
+		vm.aiCard = "card_back.png";
+		vm.teamCard = "card" + item.storypoint + ".png";
+		vm.aiPrediction = item.prediction;
+		vm.view = "estimation";
+	};	
+	
+	vm.discoverAICard = function(){
+		vm.aiCard = "card" + vm.aiPrediction + ".png";
+	};
+});
+</script>
+<style>
+.highlightedText {
+    background: yellow;
+}
+</style>
+</head>
+<body>
+	<div class="container" ng-app='sizePredictionApp'>	
+		<div ng-controller='SizeEstimationController as ctrl'>
+			
+			<!-- Backlog items view -->
+			<div ng-show="ctrl.view=='backlog_items'">
+			
+				<!-- issues filter -->
+				<div class="row" style="padding-bottom: 25px;">				
+					<div class="input-group">
+					  <input type="text" class="form-control" ng-model="ctrl.tempSearchText" placeholder="Search" ng-keypress="ctrl.keypress($event)">
+					  <span class="input-group-btn">
+					<button class="btn btn-secondary" type="button" ng-click="ctrl.search()">Go!</button>
+					  </span>
+					</div>
+				</div>
+
+				<!-- issues Table --> 
+				<div style="height: 500px;">
+					  <table class="table table-striped">
+						<thead>
+						  <tr>
+							<th style="word-wrap: break-word;max-width: 40px;">Key</th>
+							<th style="word-wrap: break-word;max-width: 100px;">Title</th>
+							<th style="word-wrap: break-word;max-width: 300px;">Description</th>
+							<th style="word-wrap: break-word;max-width: 10px;"></th>
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr ng-repeat="p in ctrl.players | filter: ctrl.filter | orderBy:'issuekey'">
+							<td style="word-wrap: break-word;max-width: 40px;">{{p.issuekey}}</td>
+							<td style="word-wrap: break-word;max-width: 100px;"><span ng-bind-html="ctrl.highlight(p.title, ctrl.searchText)"></span></td>
+							<td style="word-wrap: break-word;max-width: 300px;"<span ng-bind-html="ctrl.highlight(p.description, ctrl.searchText)"></span></td>
+							<td style="word-wrap: break-word;max-width: 10x;"><img src="planning_poker-48.png" ng-click="ctrl.predict(p)" style="cursor: pointer; float: right;" /></td>
+						  </tr>
+						</tbody>
+					  </table>
+				</div>
+			</div>			
+			    
+			<!-- Prediction View -->
+			<div ng-show="ctrl.view!='backlog_items'">
+				<center>
+					<span>Once you are ready, click on the right card to see the AI agent estimation!</span>
+					<br/><br/>
+					<table>
+						<thead>
+							<tr>
+								<th><center>Team</center></th>
+								<th><center>AI</center></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><img ng-src="{{ctrl.teamCard}}" alt="Team's estimation" /></td>
+								<td><img ng-src="{{ctrl.aiCard}}" alt="Team's estimation" ng-click="ctrl.discoverAICard()" style="cursor: pointer;"/></td>
+							</tr>				
+						</tbody>
+					</table>
+					<br/>
+					(S = small, M = medium, L = large)
+					<br/>
+					<a href="#" style="text-decoration: none" ng-click="ctrl.view='backlog_items';">Go back to the backlog view</a>
+				</center>	
+			</div>
+			
+		</div>
+	</div>
+</body>
+</html>
