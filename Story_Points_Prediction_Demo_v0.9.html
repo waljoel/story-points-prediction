@@ -11816,24 +11816,13 @@ div#notebook {
 <li>He/she gives the same number of points that similar tasks have been assigned in the past.</li>
 <li>If there isn’t a similar task, he/she starts an ordered comparison from the least to the most complex tasks. The reasoning is something like this: <i>"Is this task more complex than these ones?"</i> If so, he/she moves on with the set of well-known base tasks in order of increasing complexity. This process is repeated until the new task falls in one of the categories of complexity. By convention, in case a new task looks more complex than size X but less complex than size Y (Y being the next size in order of complexity after X) the size assigned for the task's estimation will be Y.</li>
 </ul><p>If we look at this process, <b>we can find lots of similarities with a classic machine learning problem</b>, where we have a task, T, that improves over time with experience, E, by a performance measure, P. In our case, <b>T</b> is the task of estimating/predicting the complexity of a new ticket (bug, new feature, improvement, support, etc), the experience, <b>E</b>, is the historical data of previous estimations and the performance measure, P, is the difference between the actual level of complexity and the estimation.</p>
-<p>In the following, we present a machine learning approach to predict the complexity of a new task, based on the historical data of previously estimated tasks. We will use the <b>Facebook FastText</b> tool to learn text vector representations (word and sentence embeddings) that will be implicity used as input for a text classifier that classifies a task in three categories: easy, medium and complex. Note that we are changing changing things a bit, going from a point based estimation to a category based estimation. This is because unfortunately, the amount of estimates were very <b>inbalanced</b> in our dataset, and by grouping tasks in these three categories, we can slightly simplify our problem. Anyway, we can think of each of these classes (easy, medium, complex) as points in a simplified version of the story points estimation process (in a real story points estimation, size generally follows a Fibonacci sequence 1, 2, 3, 5, 8, 13, 21, etc., or some minor variation of this sequence).</p>
+<p>In the following, we present a machine learning approach to predict the complexity of a new task, based on the historical data of previously estimated tasks. We will use the <b>Facebook FastText</b> tool to learn text vector representations (word and sentence embeddings) that will be implicity used as input for a text classifier that classifies a task in three categories: easy, medium and complex. Note that we are changing things a bit, going from a point based estimation to a category based estimation. This is because unfortunately, the amount of estimates were very <b>inbalanced</b> in our dataset, and by grouping tasks in these three categories, we can slightly simplify our problem. Anyway, we can think of each of these classes (easy, medium, complex) as points in a simplified version of the story points estimation process (in a real story points estimation, size generally follows a Fibonacci sequence 1, 2, 3, 5, 8, 13, 21, etc., or some minor variation of this sequence).</p>
 <p>At the end, we will build a basic web application like the one below, that is able to use the model that we trained so you can see it in action. It will allow you to search and pick up stories from the backlog (testing set) so you can compare the team's average estimation vs the AI estimation. Sounds cool, yeah? Well, let’s dive in!</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">IPython</span>
-<span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;iframe width=&#39;100%&#39; height=&#39;430&#39; marginwidth=&#39;0&#39; marginheight=&#39;0&#39; hspace=&#39;0&#39; vspace=&#39;0&#39; frameborder=&#39;0&#39; src=&#39;https://waljoel.github.io/story-points-prediction/index.html&#39;&gt;&lt;/iframe&gt;&quot;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
 
 <div class="output_wrapper">
 <div class="output">
@@ -12452,7 +12441,7 @@ dtype: int64</pre>
 </center><p>&lt;/br&gt;
 If you want to try more complex techniques you can try Python’s excellent package, <a href='https://github.com/scikit-learn-contrib/imbalanced-learn'>imbalanced-learn</a> with several algorithms already implemented for you.</p>
 <p>Anyway, for this work, a basic oversampling technique that creates copies of the existing data was used. The main reason for that is simplicity, because dealing with new synthetic datapoint created artificially implies finding a text representation for a sentence that could map to that new vector representation, because in the end, the FastText tool expects text in sentences and not the embeddings. Possible workarounds exist for this like approximating the synthetic point with a new sentence generated by averaging the embeddings of words used by the nearest k sentences to the synthetic points, for instance. This could be something interesting to try, so if you do it please let us know your results!</p>
-<p><b>Note:</b> Basic random oversampling of the majority class that is also a common and simple technique was combined with the oversampling, but didn’t improve the results. So, in the end just a basic oversamplig was used in order to minimize the effect of an imbalanced dataset.</p>
+<p><b>Note:</b> Basic random downsampling of the majority class that is also a common and simple technique was combined with the oversampling, but didn’t improve the results. So, in the end just a basic oversamplig was used in order to minimize the effect of an imbalanced dataset.</p>
 
 </div>
 </div>
@@ -12515,21 +12504,21 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this work we want to give <a href='https://arxiv.org/pdf/1607.01759.pdf'>FastText</a> a try, a tool developed by Facebook that is an extension of the well-known <a href='https://arxiv.org/pdf/1301.3781.pdf'>Word2Vec</a> word embedding tool previously created by a research team led by Tomas Mikolov at Google.</p>
-<p>Without entering into much detail, we can say that <b>word embedding consists of techniques that learn vector representations of words, sentences, or documents (called embeddings), so that the vector representation of similar and semantically related words, sentences, or documents are close together in the high dimensional vector space.</b> Then, by leveraging this characteristic onto the learned vectors, we can use them as features for any kind of machine learning algorithm, to train a classifier or as input to a clustering algorithm, etc.</p>
-<p>Word embedding techniques are not something new in PLN, altough in the last years, new embeddings techniques based in predictive neural networks models have became very popular and they have revolutionized the machine learning field in many domains and not only in PLN. Word embeddings have started to be used in other domains like e-comerce and recommender systems with the variation known as prod2vec, meta-prod2vec, or in mobile applications like app2vec, among others. I've applied different embedding  techniques to create Internet Domain Names embeddings from DNS traces logs and they have demostrated to be a good approach to learn semantic similarities and analogy tasks between Internet Domain Names. You can see details about how I have used word2vec for learning Internet Domain Names in <a href='http://www.clei2017-46jaiio.sadio.org.ar/sites/default/files/Mem/SLIOIA/slioia-11.pdf'>Vector representation of Internet Domain Names using a Word Embedding technique</a></p>
-<p>In regards to FastText, the main addition over word2vec is that it considers subwords inside a word. Instead of considering each word as a single token a word is splited in a set of substrings called ngrams and later the training phase is done considering each subword of a word, and the vector representation of a word is formed by averaging the vector representation of its subwords (and the word itself). The most important parameters to tune when using FastText are <b>minn</b> and <b>maxn</b> that define the min and max length of n-grams when spliting words. Aditionally, <b>FastText can be used either in supervised or unsupervised mode</b>. When using FastText in supervised mode you can can train a supervised model by using a dataset specially prepared (labeled) using a set of sentences (one per line) among with a label that acts as the class to which the sentence belongs to. So, by trainig a FastText model in supervised mode you can later perform classification tasks over new unseen sentences, being very helpful for lot of text classification and sentiment analysis problems.</p>
-<p>Having said this, we present a simple custom python wrapper for the supervised mode of the native FastText interface. Although there is already a wrapper for FastText and a native module in the well-known Gensim package, none of them included support for the supervised mode of FastText and only the unsupervised mode was supported. So, I decided to create our custom and very basic wrapper with the minimun that we need for our purpose, that is:</p>
+<p>In this work we want to give <a href='https://arxiv.org/pdf/1607.01759.pdf'>FastText</a> a try, a tool developed by Facebook that is an extension of the well-known <a href='https://arxiv.org/pdf/1301.3781.pdf'>Word2Vec</a> word embedding tool previously created by a research team led by <i>Tomas Mikolov</i> at Google.</p>
+<p>Without entering into much detail, we can say that <b>embeddings consists of techniques that learn vector representations of words, sentences, or documents, so that the vector representation of similar and semantically related words, sentences, or documents are close together in the high dimensional vector space.</b> Then, by leveraging this characteristic onto the learned vectors, we can use them as features for any kind of machine learning algorithm, to train a classifier or as input to a clustering algorithm, etc.</p>
+<p>Word embedding techniques are not something new in Natural Language Processing (NLP), altough in the last years, new embeddings techniques based in predictive neural networks models have became very popular and they have revolutionized the machine learning field in many domains, not just that of NLP. Word embeddings have started to be used in other domains like e-comerce and recommender systems with the variation known as prod2vec, meta-prod2vec, or in mobile applications like app2vec, among others. Recently, I've applied different embedding  techniques to create Internet Domain Name embeddings from DNS trace logs and they have demonstrated to be a good approach for learning semantic similarities and analogy tasks between Internet Domain Names. You can see details about how I have used word2vec for learning Internet Domain Names in <a href='http://www.clei2017-46jaiio.sadio.org.ar/sites/default/files/Mem/SLIOIA/slioia-11.pdf'>Vector representation of Internet Domain Names using a Word Embedding technique</a></p>
+<p>In regard to FastText, its main advantage over word2vec is that it considers subwords inside a word. Instead of considering each word as a single token, a word is split into a set of substrings called ngrams and later the training phase is done considering each subword of a word, and the vector representation of a word is formed by averaging the vector representation of its subwords (and the word itself). The most important parameters to tune when using FastText are <b>minn</b> and <b>maxn</b> that define the min and max length of n-grams when spliting words. Aditionally, <b>FastText can be used either in supervised or unsupervised mode</b>. When using FastText in supervised mode, you can train a supervised model by using a dataset specially prepared (labeled) using a set of sentences (one per line) along with a label that acts as the class to which the sentence belongs. So, by training a FastText model in supervised mode, you can later perform classification tasks over new unseen sentences, which is very helpful for lot of text classification and sentiment analysis problems.</p>
+<p>Having said this, we present a simple custom python wrapper for the supervised mode of the native FastText interface. Although there is already a wrapper for FastText and a native module in the well-known Gensim package, none of them include support for the supervised mode of FastText (only the unsupervised mode). So, I decided to create our custom and very basic wrapper with the minimun that we need for our purpose, that is:</p>
 <ul> 
 <li>a constructor to create new instances of the wrapper with its own state</li>
-<li>a fit method to trigger the training process by calling to the executable file and passing the required parameters (*)</li>
-<li>a predict method that receives an array with a list of sentences and returns another array (of the same size) with the integers predictions in {0,1,2} for each sentence</li>
+<li>a fit method to trigger the training process by calling the executable file and passing the required parameters (*)</li>
+<li>a predict method that receives an array with a list of sentences and returns another array (of the same size) with the integer predictions in {0, 1, 2} for each sentence</li>
 </ul><p><b>(*)</b> The training process is executed with the following parameters:</p>
 <p><ul></p>
 <li>500 epochs (iterations over the corpus)</li>
 <li>Vector size of 300 dimensions</li>
-<li>minn=4 and maxn=6 (minimun amd maximun numbers of n-grams respectively)</li>
-<li>pretrained file used to transfer previous knowledge of english language and domain specific knowledge (I've tried using the <a href='https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md'>pretrained vectors for english language</a> provided by FastText, but at the end generating my own pretrained models using others datasets of other systems in the same domain worked better. You can download <a href='https://github.com/SEAnalytics/datasets/tree/master/storypoint/IEEE%20TSE2018/pretrain%20data'>these other datasets</a> from the same github repository in order to use them for building your own pre-trained model)</li>
+<li>minn=4 and maxn=6 (minimum and maximum numbers of n-grams respectively)</li>
+<li>pretrained file used to transfer previous knowledge of the English language and domain specific knowledge (I've tried using the <a href='https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md'>pretrained vectors for English language</a> provided by FastText, but in the end generating my own pretrained models using other system datasets in the same domain worked better. You can download <a href='https://github.com/SEAnalytics/datasets/tree/master/storypoint/IEEE%20TSE2018/pretrain%20data'>these other datasets</a> from the same github repository in order to use them for building your own pre-trained model)</li>
 </div>
 </div>
 </div>
@@ -12595,11 +12584,11 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Pre-trained models are generally used for transfering previous knowledge from a similar domain to our specific problem, where we can continue and extend the learning by specializing the model to our concrete problem. Using pre-trained models allows us to avoid starting from scratch and also to get good results even if we have small datasets for training.</p>
-<p>In our particular case, we base our predictions in understanding the meaning of the natural language information provided in the title and description of each entry. So, having a pretrained model of english text could be very helpful.</p>
-<p>My first attempt was to use the pre-trained model available in the <a href='https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md'>FastText Github repository</a> for the english language. Altough this improved a bit the overall accuracy of my solution, the improvement was not too much considerably.</p>
-<p>The second approach that I followed was to use the same idea already applied in <i><a href='https://arxiv.org/pdf/1609.00489'>A deep learning model for estimating story points</a></i> and use the <a href='https://github.com/SEAnalytics/datasets/tree/master/storypoint/IEEE%20TSE2018/pretrain%20data'>pre-trained csv files</a> (issues with title and description but without story points) in order to train a fastText unsupervised model in the same domain that my problem (development software issues) and use it later when training the fastText supervised classifier in my concrete problem and specific dataset. By doing this we can start with some basic knowledge, like vector representations for words and sentences in the software development domain (domain specific), so we can have a good parameter initialization without using the labeled data.</p>
-<p>Using the second approach was much better than the first one (final results will be shown at the end). Although the pre-trained vectors trained from Wikipedia had been trained with considerably much more data than the pre-trained vectors that I got using the pre-trained csv files for others open source repositories, the second approach achieved the best results. This demostrate something already known, that the usage of pre-trained vectors trained in a similar domain can achieve better results even if it's trained with much fewer data than other pre-trained vectors that were trained in a less similar domain.</p>
+<p>Pre-trained models are generally used for transferring previous knowledge from a similar domain to our specific problem, where we can continue and extend the learning by specializing the model to our concrete problem. Using pre-trained models allows us to avoid starting from scratch and to also get good results even if we have small datasets for training.</p>
+<p>In our particular case, we base our predictions on understanding the meaning of the natural language information provided in the title and description of each entry. So, having a pretrained model of English text could be very helpful.</p>
+<p>My first attempt was to use the pre-trained model available in the <a href='https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md'>FastText Github repository</a> for the English language. Altough this improved the overall accuracy of my solution a bit, the improvement was not considerably too much.</p>
+<p>The second approach that I followed was to use the same idea already applied in <i><a href='https://arxiv.org/pdf/1609.00489'>A deep learning model for estimating story points</a></i> and use the <a href='https://github.com/SEAnalytics/datasets/tree/master/storypoint/IEEE%20TSE2018/pretrain%20data'>pre-trained csv files</a> (issues with title and description but without story points) in order to train a fastText unsupervised model in the same domain as my problem (software development issues) and use it later when training the fastText supervised classifier in my concrete problem and specific dataset. By doing this we can start with some basic knowledge, like vector representations for words and sentences in the software development domain (domain specific), so we can have a good parameter initialization without using the labeled data.</p>
+<p>Using the second approach was much better than the first one (final results will be shown at the end). Although the pre-trained vectors trained from Wikipedia had been trained with considerably much more data than the pre-trained vectors that I got using the pre-trained csv files for other open source repositories, the second approach achieved the best results. This confirms something already known, that the use of pre-trained vectors trained in a similar domain can achieve better results even if they're trained with much fewer data than other pre-trained vectors that were trained in a less similar domain.</p>
 
 </div>
 </div>
@@ -12674,7 +12663,7 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Since the fastText tool works with sentences saved in files, we need to create and save a file with all the pre-trained data to be processed</p>
+<p>Since the fastText tool works with sentences saved in files, we need to create and save a file with all the pre-trained data to be processed:</p>
 
 </div>
 </div>
@@ -12709,7 +12698,7 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Defining-the-Training-an-Evaluation-strategy">Defining the Training an Evaluation strategy<a class="anchor-link" href="#Defining-the-Training-an-Evaluation-strategy">&#182;</a></h2>
+<h2 id="Defining-the-training:-an-evaluation-strategy">Defining the training: an evaluation strategy<a class="anchor-link" href="#Defining-the-training:-an-evaluation-strategy">&#182;</a></h2>
 </div>
 </div>
 </div>
@@ -12717,7 +12706,7 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Before running the main learning method, let's define the strategy that we will use to select the training and evaluation set and also how are we going to evaluate how good is our model.</p>
+<p>Before running the main learning method, let's define the strategy that we will use to select the training and evaluation set and also how we are going to evaluate the effectiveness, or how good our model really is.</p>
 
 </div>
 </div>
@@ -12734,11 +12723,11 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>A good model should be able to understand generic hidden patterns in the data and also work well for unseen data. For this reason we should preserve some examples in our dataset to not be included in the set of examples that will be used for training purposes, so later we can test our model using those examples.</p>
-<p>Generally we would like to have as much representative data as possbile for training, and also a big number of different examples to put our model under test. But, sometimes is difficult to have both, mainly when we have small datasets like in our scenario. When this occurs, a technique called <b>k-fold cross validation</b> can help us.</p>
-<p>When using this approach, the data is splited into k partitions (folds), then in each of k iterations you select a different folder as the training set and the rest of the folders are joined to create the new training set. At the end, an average evaluation criteria of the k iterations is used to measure the quality of our model.</p>
-<p>This is a common technique that helps evaluating models to ensure that results do not depend on how you have selected your training data. K-fold cross validation is also helpful when your dataset is small (like in our case), because you can ensure that every datapoint will be part of the training and also of the testing set in some moment. Then, you do not have the risk of leaving out of the training set some important (but few) examples as could occur if you use a fixed 80-20 approach for spliting the dataset into training and testing set.</p>
-<p>Although there are some pre-built functionalities in sklearn to work with cross validation, let's code our own and simple method that given a folder index <i>i</i> (0 &lt;= i &lt; k), it returns a testing set (the dataframe in the folder <i>i</i>) and a training set that is the union of all the folders different than <i>i</i>. By doing this you can visualize clearly how it works in its background. Let's do it!</p>
+<p>A good model should be able to understand generic hidden patterns in the data and also work well for unseen data. For this reason, we should preserve some examples in our dataset to not be included in the set of examples that will be used for training purposes, so later we can test our model using those examples.</p>
+<p>Generally we would like to have as much representative data as possbile for training, and also a large number of different examples to put our model under test. But, sometimes it's difficult to have both, mainly when we have small datasets like in our scenario. When this occurs, a technique called <b>k-fold cross validation</b> can help us.</p>
+<p>When using this approach, the data is split into k partitions (folds), then in each of the k iterations you select a different folder as the testing set and the rest of the folders are joined to create the new training set. At the end, an average evaluation criteria of the k iterations is used to measure the quality of our model.</p>
+<p>This is a common technique that helps evaluate models to ensure that the results do not depend on how you have selected your training data. K-fold cross validation is also helpful when your dataset is small (like in our case), because you can ensure that every datapoint will be part of the training and also part of the testing set at any moment. Then, you do not risk leaving out of the training set some important (but few) examples like those that could occur if you use a fixed 80-20 approach for spliting the dataset into a training and testing set.</p>
+<p>Although there are some pre-built functionalities in sklearn to work with cross validation, let’s code our own simple method that given a folder index <i>i</i> (0 &lt;= i &lt; k), it returns a testing set (the dataframe in the folder <i>i</i>) and a training set that is the union of all the folders different than <i>i</i>. By doing this you can visualize clearly how it works in the background. Let's do it!</p>
 
 </div>
 </div>
@@ -12780,7 +12769,7 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Confusion-Matrix,-Precision,-Recall-and-F1-score-metrics">Confusion Matrix, Precision, Recall and F1 score metrics<a class="anchor-link" href="#Confusion-Matrix,-Precision,-Recall-and-F1-score-metrics">&#182;</a></h4>
+<h4 id="Confusion-matrix,-precision,-recall,-and-F1-score-metrics">Confusion matrix, precision, recall, and F1 score metrics<a class="anchor-link" href="#Confusion-matrix,-precision,-recall,-and-F1-score-metrics">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -12791,16 +12780,16 @@ If you want to try more complex techniques you can try Python’s excellent pack
 <p>A common approach when evaluating classification models is to use a confusion matrix. This is a simple but efficient tool to see how well our model is performing at its predictions.</p>
 <center>
     <img src='conf_matrix.png' width=300 />
-    <i>Example of Confusion matrix</i>
-</center><p>As you can see in the image above, the confusion matrix is a square matrix with one row and column for each class in the classifier. The x-axis is used for the predicted values and the y-axis for the true values. Then a cell <i>(i,j)</i> in this matrix represents the number of predictions where the class <i>j</i> was predicted but the true class was the class <i>i</i>. Note that when <i>i=j</i> then <i>cell(i,j) = cell(i,i)</i> which are cells over the diagonal and represent the number of correct predictions that were done for the class <i>i</i></p>
+    <i>Example of a Confusion matrix</i>
+</center><p>As you can see in the image above, the confusion matrix is a square matrix with one row and column for each class in the classifier. The x-axis is used for the predicted values and the y-axis for the true values. Then a cell <i>(i,j)</i> in this matrix represents the number of predictions where the class <i>j</i> was predicted but the true class was the class <i>i</i>. Note that when <i>i=j</i> then <i>cell(i,j) = cell(i,i)</i> which are cells over the diagonal and represent the number of correct predictions that were done for the class <i>i</i>.</p>
 <p>Some important metrics that we can calculate from the values in this matrix are:</p>
 <ul>
 <li>The overall accuracy (# of correct predictions / # total predictions)</li>
 <li>Precision for class <i>i</i> (# of correct predictions for class <i>i</i> / # total predictions for class <i>i</i>)</li>
 <li>Recall for class <i>i</i> (# of correct predictions for class <i>i</i> / # total true items in class <i>i</i> )</li>
-</ul><p>Also, since it's easy to have high recall with low precision and the oppsoite (high precision with low recall) it's usual to add a F1 score metric (harmonic average of precision and recall) in order to combine precision and recall in just one metric, being both important to increase its value.</p>
+</ul><p>Also, since it's easy to have high recall with low precision and the opposite (high precision with low recall) it's usual to add an F1 score metric (harmonic average of precision and recall) in order to combine precision and recall in just one metric, both being important to increase its value.</p>
 <p><i>F1 = 2 x (precision x recall) / (precision + recall)</i></p>
-<p>With this introduction to what a confusion matrix is, and the metrics that we can calculate, now let's define a helper method to help us ploting a pretty confusion matrix like the one in the image above. Later, after geting the final results we will see more in details how to examine a confusion matrix and the metrics just commented.</p>
+<p>With this introduction to what a confusion matrix is, and the metrics that we can calculate, now let's define a helper method to help us plot a pretty confusion matrix like the one in the image above. Later, after obtaining the final results we will see how to examine a confusion matrix and the metrics in more detail.</p>
 
 </div>
 </div>
@@ -12873,7 +12862,7 @@ If you want to try more complex techniques you can try Python’s excellent pack
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now that we have our data ready, a python wrapper for the FastText classifier and a strategy for getting the training and testing sets we can finally present the main learning method.</p>
+<p>Now that we have our data ready, a python wrapper for the FastText classifier and a strategy for getting the training and testing sets, we can finally present the main learning method.</p>
 
 </div>
 </div>
@@ -13095,8 +13084,8 @@ Total Overall Accuracy: 0.6570434782608696
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>After executing the cross validation, the <b>overall accuracy</b> is 0.657 (<b>66% approx</b>).</p>
-<p>But, sometimes is not enough to use the overall accuracy. Suppose you have a dataset with datapoints divided in two classes A and B. Suppose that 90% of the datapoints in your dataset belong to class A. Then you can create a dummy classifier that always predict class A (without using any learning algorithm) and it will achieve 90% of accuracy! So, for that reason other metrics like precision, recall or F1 score for each possible class could be helpful in scenarios like this (recall for class B in this example would have been 0, showing a clear problem predicting items of the minority class).</p>
+<p>After executing the cross validation, the <b>overall accuracy</b> is 0.657 (<b>approximately  66%</b>).</p>
+<p>But, sometimes it's not enough to use the overall accuracy. Suppose you have a dataset with datapoints divided in two classes, A and B. Suppose that 90% of the datapoints in your dataset belong to class A. Then you can create a dummy classifier that always predicts class A (without using any learning algorithm) and it achieves 90% accuracy! So, for that reason, other metrics like precision, recall or F1 score for each possible class could be helpful in scenarios like this (recall for class B in this example would have been 0, showing a clear problem predicting items of the minority class).</p>
 <p>Having said this, we can take a look at the different confusion matrices that were generated in each iteration of our cross validation process in order to average the important metrics to see how well our model performs for the different categories.</p>
 <p><u><b>Class 0</b></u></p>
 <ul>
@@ -13121,14 +13110,14 @@ Total Overall Accuracy: 0.6570434782608696
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><b>About Precision</b></p>
-<p>Presicion at class X represents how good is the model (classifier) when it predicts that a data point belongs to class X.</p>
-<p>We can see that the average precision for class 1 it's near to 70% that means that 7 of 10 predictions that were predicted to be of class 1, the true value was predicted successfully. The other 30% was 'confused', mainly as items of class 2. You can repeat the same reasoning to see how the model performs when predicting class 0 and 2, achieving 57% of precision in both classes, where the main confusion is with item of class 1 - medium (in some way this could be expected, some small size are confused with medium size and some big size are confused also with medium size, but is good to have few confusion between small and big sizes)</p>
-<p><b>About Recall</b></p>
-<p>Recall at class X represents how good is the model (classifier) finding data points that belongs to class X.</p>
-<p>We can notice that the main issue of our model is finding items of class 0 (small). Despite almost 57% of the times that our model predicts that an item belongs to class 0 the prediction is correct, our model fails to give more number of predictions for class 0 as it should. For that reason, the average recall of class 0 is not as good as we'd like. On the other hand, our model is very good finding the items of class 1 (medium) finding successfully more than the 80% of the items in that class. Finally, the recall for class 2 (big) allows to see that our model is able to find successfully half of the items in class 2, and this is better than the recall of class 0 (small) but is not as good as the recall for the class 1 (medium).</p>
-<p><b>About F1 score</b></p>
-<p>F1 score metric (harmonic average of precision and recall) allows to combine precision and recall in just one metric, being both important to increase its value. So, since the F1 score for class 0 is much lower than the F1 score for class 2 and this is lower than F1 score for class 1, then we can validate that our previous observations are consistent and that our model performs very good classifying items of class 1 (medium), is good classyfing items of class 2 (big) and although precision at class 0 (small) suggests that we can trust quite good when our model predicts that an item is small, we should note that a high porcentage of the small items are not being found by our model and this is probably the first point to be improved in a future optimization phase.</p>
+<p><b>About precision</b></p>
+<p>Presicion for class X represents how good the model (classifier) is when it predicts that a data point belongs to class X.</p>
+<p>We can see that the average precision for class 1 it's close to 70% that means that  7 out of 10 of the class 1 predictions were predicted to be of class 1, the true value was predicted successfully. The other 30% were 'confused', mainly as items of class 2. You can repeat the same reasoning to see how the model performs when predicting class 0 and 2, achieving 57% precision in both classes, where the main confusion is items in class 1 - medium (in some way this could be expected, small sizes are confused with medium and some big are also confused with medium, but it’s good to have little confusion between small and big).</p>
+<p><b>About recall</b></p>
+<p>Recall for class X represents how good the model (classifier) is at finding data points that belong to class X.</p>
+<p>We can observe that the main issue of our model is finding items from class 0 (small). Despite that almost 57% of the model’s predictions for class 0 are accurate, it still fails to give us as many predictions for class 0 as it should. For that reason, the average recall of class 0 is not as good as we'd like. On the other hand, our model is very good at finding class 1 (medium) items, successfully finding more than 80% of the items in that class. Finally, the recall for class 2 (big) allows us to see that our model is able to successfully find half of the items in class 2 (big), which is better than its recall for class 0 (small) but is not as great as its recall for class 1 (medium).</p>
+<p><b>About the F1 score</b></p>
+<p>The F1 score metric (harmonic average of precision and recall) allows us to combine precision and recall in just one metric, both being important to increase its value. So, since the F1 score for class 0 is much lower than the F1 score for class 2, which is lower than the F1 score for class 1, then we can validate that our previous observations are consistent and that our model performs very well at classifying items of class 1 (medium). It is also good at classyfing items of class 2 (big) and although the precision at class 0 (small), suggests that we can trust quite well when the model predicts an item is small, we should note that a high percentage of the small items are not being found by our model. This is probably the first point to be improved upon in the future.</p>
 
 </div>
 </div>
@@ -13145,7 +13134,7 @@ Total Overall Accuracy: 0.6570434782608696
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Just as an illustrative step, we are going to build now a simple web application. It will be able to search and pick a story to estimate so you can play a bit with the results of this experiment. By using the filter you can search for some specific topic like "Java", "Windows" or whatever you want and then by clicking the card's icon at the right you can see the team's average prediction and the AI agent prediction. In order to do this, we used one of the model trained during the cross validation process. Unfortunately, it can only display predictions for stories in the testing set (note that these stories were not seen by the learning algorithm during the training phase), and not for new stories. The reason for this simplification is that we are not hosting the real model with a backend side. I just generated a Javascript model for now that fits a basic AngularJS application, with the code that you can download from this <a href='https://github.com/waljoel/story-points-prediction'>GitHub repository</a>. The javascript model for the stories was built by adding the predictions to the testing_set dataframe in this way:</p>
+<p>Just as an illustrative step, we are going to now build a simple web application. It will be able to search and pick a story to estimate so you can play a bit with the results of this experiment. By using the filter you can search for some specific topics like "Java", "Windows" or whatever you want and then by clicking the card's icon on the right, you can see the team's average prediction and the AI agent prediction. In order to do this, we used one of the models trained during the cross validation process. Unfortunately, it can only display predictions for stories in the testing set (note that these stories were not seen by the learning algorithm during the training phase), and not for new stories. The reason for this simplification is that we are not hosting the real model with a backend side. I just generated a Javascript model for now that fits a basic AngularJS application, with the code that you can download from this <a href='https://github.com/waljoel/story-points-prediction'>GitHub repository</a>. The javascript model for the stories was built by adding the predictions to the testing_set dataframe in this way:</p>
 
 </div>
 </div>
@@ -13210,17 +13199,6 @@ Total Overall Accuracy: 0.6570434782608696
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">IPython</span>
-<span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;iframe width=&#39;100%&#39; height=&#39;430&#39; marginwidth=&#39;0&#39; marginheight=&#39;0&#39; hspace=&#39;0&#39; vspace=&#39;0&#39; frameborder=&#39;0&#39; src=&#39;https://waljoel.github.io/story-points-prediction/index.html&#39;&gt;&lt;/iframe&gt;&quot;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
 
 <div class="output_wrapper">
 <div class="output">
@@ -13254,19 +13232,19 @@ Total Overall Accuracy: 0.6570434782608696
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Getting good estimations has been a big headache historically in the software industry and different techniques have been tried in many kind of development processes. In this work we validated the idea of a new kind of estimation strategy based on machine learning by identifying automatically similar tasks in the past and the historical estimations. This is very similar to what is known as <b>estimation based on expert judgment</b>, with the only difference that the "expert" here is an AI software component.</p>
+<p>Obtaining good estimations has been a big headache historically in the software industry and different techniques have been tried in many kinds of development processes. In this work we validated the idea of a new kind of estimation strategy based on machine learning by identifying automatically similar tasks in the past and the historical estimations. This is very similar to what is known as <b>estimation based on expert judgment</b>, with the only difference that the "expert" here is an AI software component.</p>
 <p>Some of the important things that we can conclude from this work are:</p>
 <ul>
-    <li>Imbalanced datasets can be difficult to deal with in classification problems</li>
-    <li>The usage of random downsampling did not achieve better results in our concrete problem</li>
-    <li>The usage of a basic oversampling allowed to improve a bit our results. Some more complex oversampling techniques  probably could get even better results and it's something intereseting to test</li>
-    <li>The usage of general pre-trained vectors for english language from Wikipedia improved a bit the results, but not considerably.</li>
-    <li>The usage of a more domain specific pre-trained vectors from others open source repositories was better than to use general pre-trained vectors, getting better results. Is better to have few data but with good quality and very representative, than to have tons of data not too much representative of our domain or data with poor quality or noise.</li>
-    <li>K-fold cross validation is a helpful approach for model evaluation, mainly when the dataset is not too much big as in our problem</li>
-    <li>Overall accuracy is important, but it's not the only metric to be considered when evaluating a classifier. Metrics like Precision, Recall and F1 score can be a good option as evaluation metrics for classification problems</li>
-</ul><p>We were able to train a model that could be taken as a base model from where to start and try to optimize it by tuning different parameters that needs more experimentations. Other things that could help to improve the performance of our model is to use some smarter approach for oversampling and maybe the possibility of adding more real representative examples for the minority classes, in particular more examples of small size items could probably get a good improvement. Also it's worth to mention that if we are bad at estimating and the quality of the estimations in our dataset is poor then probably the learning algorithm will have poor estimations too. For this reason, something interesting to test would be to use a curated base history items for training, that is, items that after being worked, the real size (a metric for the effort or the amount of hours) is appended to the historical information.</p>
-<p>Finally, and although the results were not excellent, they were pretty good. We validated that a machine learning classification approach can be a good option to address a common and dificult task in the software development industry like estimating how complex a software development task is.</p>
-<p>If you improve some of the results presented here, we'd love to know it! Also please share with us your experience if you use some of these ideas to develop your own jira plugin to make your planing meetings funnier :)</p>
+    <li>Imbalanced datasets can be difficult to deal with in classification problems.</li>
+    <li>The use of random downsampling did not achieve better results in our concrete problem.</li>
+    <li>The use of a basic oversampling improved our results a bit. Some more complex oversampling techniques probably could get even better results and it’s something interesting to try out.</li>
+    <li>The use of general pre-trained vectors for the English language from Wikipedia improved the results a bit, but not considerably.</li>
+    <li>The use of more domain specific pre-trained vectors from other open source repositories was better than using general pre-trained vectors, obtaining better results. It's better to have few data but with good quality and very representative, than to have tons of data that are not representative of our domain or data with poor quality or noise.</li>
+    <li>K-fold cross validation is a helpful approach for model evaluation, mainly when the dataset is not too large as in our case</li>
+    <li>Overall accuracy is important, but it's not the only metric to be considered when evaluating a classifier. Metrics like Precision, Recall and F1 score can be a good option for evaluation metrics in classification problems.</li>
+</ul><p>We were able to train a model that could be taken as a base model from where to start and try to optimize it by tuning different parameters that need more experimenting. Other things that could help to improve the performance of our model is to use a smarter approach for oversampling and maybe the possibility of adding more real representative examples for the minority classes, in particular more examples of small size items. Also it's worth mentioning that if we are bad at estimating and the quality of the estimations in our dataset is poor, then the learning algorithm will probably have poor estimations as well. For this reason, something interesting to test would be to use a curated base history of items for training, that is, items that after having been done, the actual size (metric for the effort or how many hours they took) is added to the historical information.</p>
+<p>Finally, although the results were not excellent, they were pretty good. We validated that a machine learning classification approach can be a good option for addressing the common yet difficult issue of estimating how complex a software development task is.</p>
+<p>If you improve upon some of the results presented here, we'd love to know it! Also please share with us your experience if you use some of these ideas to develop your own jira plugin to make your planing meetings more fun. :)</p>
 
 </div>
 </div>
